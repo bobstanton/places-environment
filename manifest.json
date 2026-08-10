@@ -1,0 +1,11 @@
+{
+	"id": "places-environment",
+	"name": "Places - Environment",
+	"version": "0.0.1",
+	"minAppVersion": "1.13.0",
+	"description": "Environment provider for Places, with NOAA tides, solar events, Open-Meteo weather. Output to charts, tables, templates and maps via VaultQuery providers.",
+	"author": "Bob Stanton",
+	"authorUrl": "https://github.com/bobstanton",
+	"fundingUrl": "https://ko-fi.com/bobsoftware",
+	"isDesktopOnly": false
+}
