@@ -2,6 +2,8 @@
 
 Environmental data for [Places](https://community.obsidian.md/plugins/places): tides, solar events, and weather, as charts, tables, cards, and user templates.
 
+This is not a stand-alone plugin, to use, install along side [Places](https://community.obsidian.md/plugins/places). Refer to the [sandbox](https://sandbox.obsidian.stanton.dev/places/) for examples.
+
 ## Network requests
 
 | Area              | Request                                                    |
@@ -21,13 +23,13 @@ None.
 
 ## Dependencies
 
-| Library                                                                        | Purpose                                             |
-| ------------------------------------------------------------------------------ | --------------------------------------------------- |
-| [Chart.js](https://github.com/chartjs/Chart.js)                                | Tide, solar, and weather charts                     |
+| Library                                                                         | Purpose                                             |
+| ------------------------------------------------------------------------------- | --------------------------------------------------- |
+| [Chart.js](https://github.com/chartjs/Chart.js)                                 | Tide, solar, and weather charts                     |
 | [chartjs-adapter-date-fns](https://github.com/chartjs/chartjs-adapter-date-fns) | Time axis support for Chart.js                      |
-| [date-fns](https://github.com/date-fns/date-fns)                               | Date arithmetic and formatting                      |
-| [lunarphase-js](https://github.com/nikolaijjensen/lunarphase-js)               | Moon phase for solar output                         |
-| [markdown-table](https://github.com/wooorm/markdown-table)                     | Renders generated tables                            |
-| [openmeteo](https://github.com/open-meteo/typescript)                          | Decodes Open-Meteo flatbuffers responses            |
-| [user-template-renderer](https://github.com/bobstanton/user-template-renderer) | Runs the user template in `places-weather-template` |
-| [places-shared](https://github.com/bobstanton/places-shared)                   | Shared map, overlay, routing, and utility code      |
+| [date-fns](https://github.com/date-fns/date-fns)                                | Date arithmetic and formatting                      |
+| [lunarphase-js](https://github.com/nikolaijjensen/lunarphase-js)                | Moon phase for solar output                         |
+| [markdown-table](https://github.com/wooorm/markdown-table)                      | Renders generated tables                            |
+| [openmeteo](https://github.com/open-meteo/typescript)                           | Weather and seasonal forecasts                      |
+| [user-template-renderer](https://github.com/bobstanton/user-template-renderer)  | Runs the user template in `places-weather-template` |
+| [places-shared](https://github.com/bobstanton/places-shared)                    | Shared map, overlay, routing, and utility code      |

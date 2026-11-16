@@ -9,17 +9,17 @@ Display NOAA tide predictions as tables or charts, with optional sunrise/sunset 
 
 ## Available Code Blocks
 
-| Code Block                | Description                                      |
-| ------------------------- | ------------------------------------------------ |
-| `places-tide-table`       | Display tide events as a Markdown-style table    |
-| `places-tide-cards`       | Display high/low tide predictions as daily cards |
-| `places-tide-chart`       | Display tide predictions as an interactive chart |
-| `places-tides-vaultquery` | Define materialized tide tables for VaultQuery   |
-| `places-tide-help`        | Show this general help                           |
-| `places-tide-table-help`  | Show detailed table help                         |
-| `places-tide-cards-help`  | Show detailed card help                          |
-| `places-tide-chart-help`  | Show detailed chart help                         |
-| `places-vaultquery-tables-help`  | Show VaultQuery table-provider help              |
+| Code Block                      | Description                                      |
+| ------------------------------- | ------------------------------------------------ |
+| `places-tide-table`             | Display tide events as a Markdown-style table    |
+| `places-tide-cards`             | Display high/low tide predictions as daily cards |
+| `places-tide-chart`             | Display tide predictions as an interactive chart |
+| `places-tides-vaultquery`       | Define materialized tide tables for VaultQuery   |
+| `places-tide-help`              | Show this general help                           |
+| `places-tide-table-help`        | Show detailed table help                         |
+| `places-tide-cards-help`        | Show detailed card help                          |
+| `places-tide-chart-help`        | Show detailed chart help                         |
+| `places-vaultquery-tables-help` | Show VaultQuery table-provider help              |
 
 ## Basic Usage
 
@@ -38,22 +38,22 @@ endDate: +1
 
 ## Settings
 
-| Setting | Description | Examples |
-| ------- | ----------- | -------- |
-| location | `lat, lon` or `Name: lat, lon` used to find the nearest tide station | 39.355, -74.418 |
-| station | Station name | Atlantic City |
-| stationId | NOAA station ID | 8534720 |
-| datum | Tidal datum | **MLLW**, NAVD88, STND |
-| units | Unit system. Defaults to the global units setting | metric, imperial |
-| startDate | Start date | **today**, +3, 2025-08-15 |
-| days | Calendar days to display when `endDate` is omitted | **2**, 7 |
-| endDate | Inclusive end date, such as `+1`, `+1d`, or `2025-08-22` | +1, +3d, 2025-08-22 |
-| showStation | Show tide station metadata | **true**, false |
-| showMap | Show a map of the requested coordinates and the answering station | true, **false** |
-| mapProvider | Map provider for `showMap` (defaults to the global map provider) | any installed map provider |
-| showSolar | Solar event rows in tables and cards (charts always shade twilight stages) | true, **false** |
-| showMoonPhases | Show moon phase context | true, **false** |
-| cache | How long cached data stays fresh: a duration, an expiration date (a bare date expires at the end of that day), or `forever` | **true**, false, forever, 30m, 7d, 2027-01-01 |
+| Setting        | Description                                                                                                                 | Examples                                      |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| location       | `lat, lon` or `Name: lat, lon` used to find the nearest tide station                                                        | 39.355, -74.418                               |
+| station        | Station name                                                                                                                | Atlantic City                                 |
+| stationId      | NOAA station ID                                                                                                             | 8534720                                       |
+| datum          | Tidal datum                                                                                                                 | **MLLW**, NAVD88, STND                        |
+| units          | Unit system. Defaults to the global units setting                                                                           | metric, imperial                              |
+| startDate      | Start date                                                                                                                  | **today**, +3, 2025-08-15                     |
+| days           | Calendar days to display when `endDate` is omitted                                                                          | **2**, 7                                      |
+| endDate        | Inclusive end date, such as `+1`, `+1d`, or `2025-08-22`                                                                    | +1, +3d, 2025-08-22                           |
+| showStation    | Show tide station metadata                                                                                                  | **true**, false                               |
+| showMap        | Show a map of the requested coordinates and the answering station                                                           | true, **false**                               |
+| mapProvider    | Map provider for `showMap` (defaults to the global map provider)                                                            | any installed map provider                    |
+| showSolar      | Solar event rows in tables and cards (charts always shade twilight stages)                                                  | true, **false**                               |
+| showMoonPhases | Show moon phase context                                                                                                     | true, **false**                               |
+| cache          | How long cached data stays fresh: a duration, an expiration date (a bare date expires at the end of that day), or `forever` | **true**, false, forever, 30m, 7d, 2027-01-01 |
 
 Location can come from a query parameter:
 

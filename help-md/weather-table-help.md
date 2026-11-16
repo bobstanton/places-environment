@@ -33,17 +33,21 @@ days: 7
 
 ## Settings
 
-| Setting | Description | Examples |
-| ------- | ----------- | -------- |
-| coordinates | `lat, lon` or `Name: lat, lon` (or use frontmatter Location) | 41.408, -75.662 |
-| mode | Display mode | **hourly**, daily |
-| columns | Comma-separated list of columns to display |  |
-| days | Calendar days to display | **7**, 2 |
-| startDate | Start date | **today**, +3, 2025-08-15 |
-| endDate | Inclusive end date (alternative to days) | +1, +3d, 2025-08-22 |
-| units | Unit system. Defaults to the global units setting | metric, imperial |
-| cache | How long cached data stays fresh: a duration, an expiration date (a bare date expires at the end of that day), or `forever` | **true**, false, forever, 30m, 7d, 2027-01-01 |
-| cellSelection | Grid cell preference | **land**, sea, nearest |
+| Setting         | Description                                                                                                                                                                            | Examples                                      |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| coordinates     | `lat, lon` or `Name: lat, lon` (or use frontmatter Location)                                                                                                                           | 41.408, -75.662                               |
+| mode            | Display mode                                                                                                                                                                           | **hourly**, daily                             |
+| columns         | Comma-separated list of columns to display                                                                                                                                             |                                               |
+| days            | Calendar days to display                                                                                                                                                               | **7**, 2                                      |
+| startDate       | Start date                                                                                                                                                                             | **today**, +3, 2025-08-15                     |
+| endDate         | Inclusive end date (alternative to days)                                                                                                                                               | +1, +3d, 2025-08-22                           |
+| units           | Unit system. Defaults to the global units setting                                                                                                                                      | metric, imperial                              |
+| cache           | How long cached data stays fresh: a duration, an expiration date (a bare date expires at the end of that day), or `forever`                                                            | **true**, false, forever, 30m, 7d, 2027-01-01 |
+| cellSelection   | Grid cell preference                                                                                                                                                                   | **land**, sea, nearest                        |
+| location        | Alternative location key; accepts `Name: lat, lon` and falls back to the note's `Location` property                                                                                    | Scranton: 41.408,-75.662                      |
+| startTime       | Start hour filter for hourly data                                                                                                                                                      | 6am, 8, 06:00                                 |
+| endTime         | End hour filter for hourly data                                                                                                                                                        | 10pm, 22, 22:00                               |
+| queryParameters | UI controls that adjust the block without editing it; `queryParametersPosition`, `queryParametersLayout`, and `queryParametersCollapsed` place them. See `places-queryparameters-help` | `- name: limit`                               |
 
 ## Hourly Columns
 

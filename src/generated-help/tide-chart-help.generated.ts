@@ -173,7 +173,7 @@ export function render(container: HTMLElement, _ctx: RenderContext): void {
   td9.appendText(", 50vh");
   const row14 = tbody.createEl('tr');
   row14.createEl('td', { text: "width" });
-  row14.createEl('td', { text: "Chart width" });
+  row14.createEl('td', { text: "Width of everything the block renders, its legend and info included. A percentage measures the note's width, vw the window's" });
   row14.createEl('td', { text: "100%, 400px" });
   const row15 = tbody.createEl('tr');
   row15.createEl('td', { text: "cache" });
@@ -183,4 +183,23 @@ export function render(container: HTMLElement, _ctx: RenderContext): void {
   const td11 = row15.createEl('td');
   td11.createEl('strong', { cls: 'places-environment-help-bold', text: "true" });
   td11.appendText(", false, forever, 30m, 7d, 2027-01-01");
+  const row16 = tbody.createEl('tr');
+  row16.createEl('td', { text: "debug" });
+  const td12 = row16.createEl('td');
+  td12.createEl('code', { cls: 'places-environment-help-code', text: "settings" });
+  td12.appendText(" shows a table of how every setting resolved across default, global, frontmatter, and block layers");
+  row16.createEl('td', { text: "settings" });
+  const row17 = tbody.createEl('tr');
+  row17.createEl('td', { text: "queryParameters" });
+  const td13 = row17.createEl('td');
+  td13.appendText("UI controls that adjust the block without editing it; ");
+  td13.createEl('code', { cls: 'places-environment-help-code', text: "queryParametersPosition" });
+  td13.appendText(", ");
+  td13.createEl('code', { cls: 'places-environment-help-code', text: "queryParametersLayout" });
+  td13.appendText(", and ");
+  td13.createEl('code', { cls: 'places-environment-help-code', text: "queryParametersCollapsed" });
+  td13.appendText(" place them. See ");
+  td13.createEl('code', { cls: 'places-environment-help-code', text: "places-queryparameters-help" });
+  const td14 = row17.createEl('td');
+  td14.createEl('code', { cls: 'places-environment-help-code', text: "- name: limit" });
 }

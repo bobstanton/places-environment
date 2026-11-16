@@ -1,37 +1,42 @@
-import { Plugin, App, Setting, MarkdownPostProcessorContext } from 'obsidian';
-import { NoaaApiService } from './api-services/NoaaApiService';
-import { SolarApiService } from './api-services/SolarApiService';
-import { TideDataService } from './services/TideDataService';
-import { TideTableProcessor } from './code-block-processor/TideTableProcessor';
-import { TideCardsProcessor } from './code-block-processor/TideCardsProcessor';
-import { TideChartProcessor } from './code-block-processor/TideChartProcessor';
+import { registerCodeBlockActions } from 'places-shared/obsidian/ui';
+import { Plugin, App, Setting, MarkdownPostProcessorContext, MarkdownRenderer, Component, type SettingGroupItem } from 'obsidian';
+import { NoaaApiService } from 'places-environment/core';
+import { getLocationStringFromFrontmatter } from './utilities/FrontmatterUtilities';
+import { SolarApiService } from 'places-environment/core';
+import { TideDataService } from 'places-environment/core';
+import { TideTableProcessor } from './core/blocks/TideTableProcessor';
+import { TideCardsProcessor } from './core/blocks/TideCardsProcessor';
+import { TideChartProcessor } from './core/blocks/TideChartProcessor';
 import { UnitsSystem } from "places-shared/units";
 
-import { SolarTableProcessor } from './code-block-processor/SolarTableProcessor';
-import { SolarChartProcessor } from './code-block-processor/SolarChartProcessor';
+import { SolarTableProcessor } from './core/blocks/SolarTableProcessor';
+import { SolarChartProcessor } from './core/blocks/SolarChartProcessor';
 
 import { WeatherDataService } from './services/WeatherDataService';
-import { WeatherProcessor } from './code-block-processor/WeatherProcessor';
-import { WeatherChartProcessor } from './code-block-processor/WeatherChartProcessor';
-import { WeatherTableProcessor } from './code-block-processor/WeatherTableProcessor';
-import { WeatherTemplateProcessor } from './code-block-processor/WeatherTemplateProcessor';
+import { WeatherProcessor } from './core/blocks/WeatherProcessor';
+import { WeatherChartProcessor } from './core/blocks/WeatherChartProcessor';
+import { WeatherTableProcessor } from './core/blocks/WeatherTableProcessor';
+import { WeatherTemplateProcessor } from './core/blocks/WeatherTemplateProcessor';
 import { WeatherHelpProcessor } from './code-block-processor/WeatherHelpProcessor';
-import { createPlacesWeatherProvider } from './services/VaultQueryWeatherProvider';
-import { createPlacesTideProvider } from './services/VaultQueryTideProvider';
-import { createPlacesSolarProvider } from './services/VaultQuerySolarProvider';
+import { DisposerRenderChild } from './code-block-processor/DisposerRenderChild';
+import { createPlacesWeatherProvider } from 'places-environment/core';
+import { createPlacesTideProvider } from 'places-environment/core';
+import { createPlacesSolarProvider } from 'places-environment/core';
 import { registerVaultQueryTableProviders, type ManagedVaultQueryTableProviderRegistration } from 'vaultquery/api';
 
 import { IPlaceExtensionSettings, IPlacesExtensionHostSettings, DEFAULT_SETTINGS as MAIN_DEFAULT_SETTINGS } from "places-shared/settings";
-import { IPlacePluginExtension, IPlacePluginExtensionExports, IPlacesHostServices, registerPlaceExtensionLifecycle, PLACES_EXTENSION_API_VERSION, type ExtensionSettingsGroup } from "places-shared/services";
-import { getErrorMessage, scalarToString, Utilities, ICacheEntry, renderError, logger , configureRequestLogging } from "places-shared/utils";
-import { createFloatingRefreshButton } from "places-shared/ui";
+import { readKnapTemplateFile, IPlacePluginExtension, IPlacePluginExtensionExports, IPlacesHostServices, registerPlaceExtensionLifecycle, PLACES_EXTENSION_API_VERSION, type ExtensionSettingsGroup } from "places-shared/obsidian/services";
+import { getErrorMessage, scalarToString, Utilities, ICacheEntry, renderError, logger, configureRequestLogging } from "places-shared/utils";
+import { createFloatingRefreshButton } from "places-shared/obsidian/ui";
 import { initOverlayCompression } from "places-shared/compression";
 
 import { ALL_CODE_BLOCK_DEFINITIONS, ALL_HIGHLIGHT_CONFIGS } from './CodeBlockDefinitions';
 import { DEFAULT_MAX_CACHE_ENTRIES, evictOrdinaryCacheEntries, parseMaxCacheEntries } from './services/PersistentCachePolicy';
 import { decodeCachePayload, encodeCachePayload, isZstdCachePayload } from './services/PersistentCacheCodec';
+import { createWeatherPopupRenderer } from './popup/WeatherPopupRenderer';
 
 import './styles.css';
+import 'places-shared/block-styles.css';
 import 'places-shared/error-styles.css';
 import 'places-shared/loading-styles.css';
 import 'places-shared/settings-trace-styles.css';
@@ -45,10 +50,12 @@ const DEFAULT_SETTINGS: Record<string, string> = {
 
 function isCacheDataRecord(value: unknown): value is Record<string, ICacheEntry> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+
   for (const entry of Object.values(value as Record<string, unknown>)) {
     if (typeof entry !== 'object' || entry === null || !('k' in entry) || !('t' in entry) || !('d' in entry)) return false;
     if (typeof entry.k !== 'string' || typeof entry.t !== 'number') return false;
   }
+
   return true;
 }
 
@@ -93,10 +100,9 @@ export default class PlacesEnvironmentPlugin extends Plugin implements IPlacePlu
       get: (key: string) => this.get(key),
       set: (key: string, data: unknown) => this.set(key, data),
     };
-    this.noaaService = new NoaaApiService(cacheStore);
-    // One shared solar service: tide charts, solar blocks, and provider tables all read
-    // the same persistent cache (solar events for a location and date never change).
-    this.solarService = new SolarApiService(cacheStore);
+
+    this.noaaService = new NoaaApiService(cacheStore, host.apiUsage);
+    this.solarService = new SolarApiService(cacheStore, host.apiUsage);
     this.tideDataService = new TideDataService(this.noaaService, this, this.solarService);
     this.tableProcessor = new TideTableProcessor(this, this.tideDataService);
     this.cardsProcessor = new TideCardsProcessor(this, this.tideDataService);
@@ -119,6 +125,7 @@ export default class PlacesEnvironmentPlugin extends Plugin implements IPlacePlu
       codeBlockProcessors: this.getCodeBlockProcessors(),
       codeBlockDefinitions: ALL_CODE_BLOCK_DEFINITIONS,
       highlightConfigs: ALL_HIGHLIGHT_CONFIGS,
+      popupRenderers: [createWeatherPopupRenderer()],
       settingsGroup: this.settingsGroup(extensionSettings),
       dispose: () => this.disposeVaultQueryProviders(),
     };
@@ -127,33 +134,37 @@ export default class PlacesEnvironmentPlugin extends Plugin implements IPlacePlu
   async onload() {
     await initOverlayCompression();
     const savedData: unknown = await this.loadData();
+
     if (typeof savedData === 'object' && savedData !== null && 'cacheData' in savedData && isCacheDataRecord(savedData.cacheData)) {
       this.cacheData = savedData.cacheData;
     }
+
     registerPlaceExtensionLifecycle(this);
   }
   
   private createEnvironmentBlock(type: string, label: string, getHandler: () => ((source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => void | Promise<void>) | null, refreshLabel?: string): NonNullable<IPlacePluginExtensionExports['codeBlockProcessors']>[number] {
-    // Every environment block reads a location or coordinate list, and both
-    // accept the named form (`Scranton: 41.408, -75.662`). The host parses the
-    // block before this processor runs, and needs the same list the readers
-    // pass to CodeBlockReader or the second colon fails the block outright.
-    return { blockType: type, colonTextKeys: ['coordinates', 'location'], processor: async (source, el, ctx) => {
+    return { blockType: type, sourceFormat: type.endsWith('-template') ? 'yaml-template' : 'yaml', indexDependencies: 'notes', colonTextKeys: ['coordinates', 'location'], processor: async (source, el, ctx) => {
       const handler = getHandler();
+
       if (!handler) {
         this.renderProcessorError(el, label, 'Service not initialized.');
+
         return;
       }
+
       try {
         await handler(source, el, ctx);
       } catch (error) {
         logger.scope('Places').error(`Error processing ${label}:`, error);
+
         if (refreshLabel) {
-          this.renderRefreshableProcessorError(el, label, (error as Error).message, refreshLabel, async () => {
+          this.renderRefreshableProcessorError(el, ctx, label, (error as Error).message, refreshLabel, async () => {
             const retry = getHandler();
+
             if (!retry) {
               throw new Error('Service not initialized.');
             }
+
             await retry(source, el, ctx);
           });
         } else {
@@ -166,10 +177,12 @@ export default class PlacesEnvironmentPlugin extends Plugin implements IPlacePlu
   private getCodeBlockProcessors(): NonNullable<IPlacePluginExtensionExports['codeBlockProcessors']> {
     const dataBlock = (get: () => { processCodeBlock(source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext): Promise<void> } | null) => () => {
       const processor = get();
+
       return processor ? processor.processCodeBlock.bind(processor) : null;
     };
     const helpBlock = (invoke: (help: WeatherHelpProcessor, source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => void) => () => {
       const help = this.weatherHelpProcessor;
+
       return help ? (source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => invoke(help, source, el, ctx) : null;
     };
 
@@ -201,11 +214,13 @@ export default class PlacesEnvironmentPlugin extends Plugin implements IPlacePlu
   private async registerVaultQueryProviders(): Promise<void> {
     if (!this.weatherDataService || !this.tideDataService) {
       logger.scope('Places').warn('[Environment VaultQuery] Provider registration skipped: services are not initialized');
+
       return;
     }
 
     if (this.vaultQueryRegistration !== null) {
       logger.scope('Places').info('[Environment VaultQuery] Provider registration skipped: managed registration already exists');
+
       return;
     }
 
@@ -223,8 +238,10 @@ export default class PlacesEnvironmentPlugin extends Plugin implements IPlacePlu
         error: (message, error) => logger.scope('Places').error(message, error),
       },
     });
+
     this.vaultQueryRegistration = registration;
     const tables = await registration;
+
     if (this.vaultQueryRegistration === registration) {
       this.vaultQueryTables = tables;
     }
@@ -235,6 +252,7 @@ export default class PlacesEnvironmentPlugin extends Plugin implements IPlacePlu
       window.clearTimeout(this.cacheSaveTimer);
       this.cacheSaveTimer = null;
     }
+
     void this.flushCacheSave();
     void this.disposeVaultQueryProviders();
 
@@ -257,34 +275,71 @@ export default class PlacesEnvironmentPlugin extends Plugin implements IPlacePlu
   private async disposeVaultQueryProviders(): Promise<void> {
     const registration = this.vaultQueryRegistration;
     const existingTables = this.vaultQueryTables;
+
     this.vaultQueryRegistration = null;
     this.vaultQueryTables = null;
     const tables = registration !== null ? await registration.catch(() => null) : existingTables;
+
     await tables?.dispose();
   }
 
   get(cacheKey: string, retention?: 'forever'): ICacheEntry | null {
     const entry = this.cacheData[cacheKey];
+
     if (entry && retention === 'forever' && entry.retention !== 'forever') {
       entry.retention = 'forever';
       this.scheduleCacheSave();
     }
+
     if (!entry) return null;
     if (!isZstdCachePayload(entry.d)) return entry;
 
     const memo = this.decodedCacheData.get(cacheKey);
+
     if (memo?.t === entry.t) {
       return { ...entry, d: memo.d };
     }
 
     try {
       const decoded = decodeCachePayload(entry.d);
+
       this.decodedCacheData.set(cacheKey, { t: entry.t, d: decoded });
+
       return { ...entry, d: decoded };
     } catch (error) {
       logger.scope('Cache').warn('Failed to decode environmental cache entry', { cacheKey, error });
+
       return null;
     }
+  }
+
+  locationFromNote(sourcePath: string | undefined): string | null {
+    return sourcePath ? getLocationStringFromFrontmatter(this.app, sourcePath) : null;
+  }
+
+  registerCleanup(el: HTMLElement, ctx: MarkdownPostProcessorContext, cleanup: () => void): void {
+    ctx.addChild(new DisposerRenderChild(el, cleanup));
+  }
+
+  readKnapTemplateFile(reference: string, sourcePath: string): Promise<string> {
+    return readKnapTemplateFile(this.app, reference, sourcePath);
+  }
+
+  renderMarkdown(markdown: string, container: HTMLElement, sourcePath: string, owner: import('places-shared/ui').RenderOwner): Promise<void> {
+    const component = new Component();
+
+    component.load();
+    owner.register(() => component.unload());
+
+    return MarkdownRenderer.render(this.app, markdown, container, sourcePath, component);
+  }
+
+  registerActions(container: HTMLElement, ctx: MarkdownPostProcessorContext): void {
+    registerCodeBlockActions(container, ctx);
+  }
+
+  get apiUsage(): IPlacesHostServices['apiUsage'] {
+    return this.hostServices?.apiUsage;
   }
 
   getDefaultUnits(): UnitsSystem {
@@ -304,6 +359,7 @@ export default class PlacesEnvironmentPlugin extends Plugin implements IPlacePlu
   async set(cacheKey: string, data: unknown, retention?: 'forever'): Promise<void> {
     const timestamp = Date.now();
     const payload = encodeCachePayload(data);
+
     this.cacheData[cacheKey] = {
       k: cacheKey,
       t: timestamp,
@@ -337,6 +393,7 @@ export default class PlacesEnvironmentPlugin extends Plugin implements IPlacePlu
   private async flushCacheSave(): Promise<void> {
     if (!this.cacheDirty) return;
     this.cacheDirty = false;
+
     await this.saveData({ cacheData: this.cacheData });
   }
 
@@ -344,6 +401,7 @@ export default class PlacesEnvironmentPlugin extends Plugin implements IPlacePlu
     const count = Object.keys(this.cacheData).length;
     const sizeBytes = JSON.stringify(this.cacheData).length;
     const sizeKB = Math.round(sizeBytes / 1024 * 100) / 100;
+
     return { count, sizeKB };
   }
 
@@ -351,10 +409,12 @@ export default class PlacesEnvironmentPlugin extends Plugin implements IPlacePlu
     this.cacheData = {};
     this.decodedCacheData.clear();
     this.cacheDirty = false;
+
     if (this.cacheSaveTimer !== null) {
       window.clearTimeout(this.cacheSaveTimer);
       this.cacheSaveTimer = null;
     }
+
     await this.saveData({ cacheData: this.cacheData });
   }
 
@@ -363,17 +423,20 @@ export default class PlacesEnvironmentPlugin extends Plugin implements IPlacePlu
     renderError(el, { icon: '⚠️', title: `${processorType} Error`, message });
   }
 
-  private renderRefreshableProcessorError(el: HTMLElement, processorType: string, message: string, refreshLabel: string, onRefresh: () => Promise<void>): void {
+  private renderRefreshableProcessorError(el: HTMLElement, ctx: MarkdownPostProcessorContext, processorType: string, message: string, refreshLabel: string, onRefresh: () => Promise<void>): void {
     el.empty();
     const errorContainer = renderError(el, { icon: '⚠️', title: `${processorType} Error`, message });
     const buttonContainer = errorContainer.createDiv('places-floating-buttons');
+
     createFloatingRefreshButton({
       buttonContainer,
+      ctx,
       ariaLabel: refreshLabel,
       onRefresh,
       onError: (error) => {
         this.renderRefreshableProcessorError(
           el,
+          ctx,
           processorType,
           getErrorMessage(error),
           refreshLabel,
@@ -384,49 +447,63 @@ export default class PlacesEnvironmentPlugin extends Plugin implements IPlacePlu
   }
 
   private settingsGroup(settings: IPlaceExtensionSettings): ExtensionSettingsGroup {
+    const cacheItems: SettingGroupItem[] = [
+      {
+        name: 'Enable caching',
+        desc: 'Cache environmental data for later use.',
+        control: { type: 'toggle', key: 'enableCache' },
+      },
+      {
+        name: 'Maximum cached entries',
+        desc: 'Maximum ordinary entries retained in the environment cache.',
+        control: { type: 'number', key: 'maxCacheEntries', placeholder: String(DEFAULT_MAX_CACHE_ENTRIES), min: 1, max: 10000 },
+      },
+      {
+        name: 'Cache information',
+        render: (setting) => this.renderCacheInformation(setting, settings),
+      },
+    ];
+    const attributionItem: SettingGroupItem = {
+      name: 'Data attribution',
+      searchable: false,
+      render: (setting) => {
+        setting.settingEl.empty();
+        this.renderAttribution(setting.settingEl);
+      },
+    };
+
     return {
       heading: 'Environment',
-      items: [
-        {
-          name: 'Enable caching',
-          desc: 'Cache environmental data to improve performance and enable offline use',
-          control: { type: 'toggle', key: 'enableCache' },
-        },
-        {
-          name: 'Maximum cached entries',
-          desc: 'Maximum number of ordinary environmental cache entries. Entries cached with "forever" are retained separately and do not count toward this limit.',
-          control: { type: 'number', key: 'maxCacheEntries', placeholder: String(DEFAULT_MAX_CACHE_ENTRIES), min: 1, max: 10000 },
-        },
-        {
-          name: 'Cache information',
-          render: (setting) => this.renderCacheInformation(setting, settings),
-        },
-        {
-          name: 'Data attribution',
-          searchable: false,
-          render: (setting) => {
-            setting.settingEl.empty();
-            this.renderAttribution(setting.settingEl);
-          },
-        },
+      category: 'feature',
+      displayValue: () => settings.enableCache === 'false' ? 'Cache off' : 'Cache on',
+      items: [...cacheItems, attributionItem],
+      pageItems: [
+        { type: 'group', heading: 'Cache', items: cacheItems },
+        { type: 'group', heading: 'Data sources', items: [attributionItem] },
       ],
       getValue: (key) => {
-        if (key === 'enableCache') return settings.enableCache !== 'false'; // Default to true
+        if (key === 'enableCache') return settings.enableCache !== 'false';  
         if (key === 'maxCacheEntries') return parseMaxCacheEntries(settings.maxCacheEntries);
+
         return settings[key];
       },
       setValue: (key, value) => {
         if (key === 'enableCache') {
           settings.enableCache = String(value === true);
+
           return;
         }
+
         if (key === 'maxCacheEntries') {
           const maxEntries = parseMaxCacheEntries(scalarToString(value));
+
           settings.maxCacheEntries = String(maxEntries);
           evictOrdinaryCacheEntries(this.cacheData, maxEntries);
           this.scheduleCacheSave();
+
           return;
         }
+
         settings[key] = scalarToString(value);
       },
     };
@@ -437,9 +514,11 @@ export default class PlacesEnvironmentPlugin extends Plugin implements IPlacePlu
 
     const tideDataP = attributionEl.createEl('p');
     const tideDataStrong = tideDataP.createEl('strong');
+
     tideDataStrong.setText('🌊 Tide data:');
     tideDataP.appendText(' ');
     const tideDataLink = tideDataP.createEl('a');
+
     tideDataLink.href = 'https://tidesandcurrents.noaa.gov/';
     tideDataLink.target = '_blank';
     tideDataLink.rel = 'noopener';
@@ -447,9 +526,11 @@ export default class PlacesEnvironmentPlugin extends Plugin implements IPlacePlu
 
     const solarDataP = attributionEl.createEl('p');
     const solarDataStrong = solarDataP.createEl('strong');
+
     solarDataStrong.setText('🌅 Sunrise/sunset data:');
     solarDataP.appendText(' ');
     const solarDataLink = solarDataP.createEl('a');
+
     solarDataLink.href = 'https://sunrise-sunset.org/';
     solarDataLink.target = '_blank';
     solarDataLink.rel = 'noopener';
@@ -457,15 +538,18 @@ export default class PlacesEnvironmentPlugin extends Plugin implements IPlacePlu
 
     const weatherDataP = attributionEl.createEl('p');
     const weatherDataStrong = weatherDataP.createEl('strong');
-    weatherDataStrong.setText('🌤️ weather data:');
+
+    weatherDataStrong.setText('🌤️ Weather data:');
     weatherDataP.appendText(' ');
     const weatherDataLink = weatherDataP.createEl('a');
+
     weatherDataLink.href = 'https://open-meteo.com/';
     weatherDataLink.target = '_blank';
     weatherDataLink.rel = 'noopener';
     weatherDataLink.setText('Weather data by Open-Meteo.com');
 
     const disclaimerP = attributionEl.createEl('p', { cls: 'places-environment-disclaimer' });
+
     disclaimerP.setText('Data comes from these free public APIs; their usage terms apply.');
   }
 
@@ -479,6 +563,7 @@ export default class PlacesEnvironmentPlugin extends Plugin implements IPlacePlu
       descText += ` Cache entries are automatically cleaned up after 30 days.`;
 
       const cleanupDate = lastCleanup > 0 ? new Date(lastCleanup).toLocaleDateString() : 'Never';
+
       descText += ` Last cleanup: ${cleanupDate} (cleanup runs every 7 days).`;
     }
 
@@ -489,6 +574,7 @@ export default class PlacesEnvironmentPlugin extends Plugin implements IPlacePlu
       button.onClick(async () => {
         await this.clear();
         const newDescText = `Cache contains 0 entries using 0 KB. Cache entries are automatically cleaned up after 30 days or when the plugin is updated.`;
+
         setting.setDesc(newDescText);
         button.setButtonText('Cache cleared!');
         window.setTimeout(() => {

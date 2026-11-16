@@ -168,7 +168,7 @@ export function render(container: HTMLElement, _ctx: RenderContext): void {
   row9.createEl('td', { text: "400px, 50vh" });
   const row10 = tbody.createEl('tr');
   row10.createEl('td', { text: "width" });
-  row10.createEl('td', { text: "Optional rendered block width" });
+  row10.createEl('td', { text: "Width of everything the block renders, its legend and info included. A percentage measures the note's width, vw the window's" });
   row10.createEl('td', { text: "100%, 400px" });
   const row11 = tbody.createEl('tr');
   row11.createEl('td', { text: "cache" });
@@ -178,4 +178,27 @@ export function render(container: HTMLElement, _ctx: RenderContext): void {
   const td10 = row11.createEl('td');
   td10.createEl('strong', { cls: 'places-environment-help-bold', text: "true" });
   td10.appendText(", false, forever, 30m, 7d, 2027-01-01");
+  const row12 = tbody.createEl('tr');
+  row12.createEl('td', { text: "timezone" });
+  row12.createEl('td', { text: "IANA timezone for solar event times" });
+  row12.createEl('td', { text: "America/New_York, UTC" });
+  const row13 = tbody.createEl('tr');
+  row13.createEl('td', { text: "debug" });
+  const td11 = row13.createEl('td');
+  td11.createEl('code', { cls: 'places-environment-help-code', text: "settings" });
+  td11.appendText(" shows a table of how every setting resolved across default, global, frontmatter, and block layers");
+  row13.createEl('td', { text: "settings" });
+  const row14 = tbody.createEl('tr');
+  row14.createEl('td', { text: "queryParameters" });
+  const td12 = row14.createEl('td');
+  td12.appendText("UI controls that adjust the block without editing it; ");
+  td12.createEl('code', { cls: 'places-environment-help-code', text: "queryParametersPosition" });
+  td12.appendText(", ");
+  td12.createEl('code', { cls: 'places-environment-help-code', text: "queryParametersLayout" });
+  td12.appendText(", and ");
+  td12.createEl('code', { cls: 'places-environment-help-code', text: "queryParametersCollapsed" });
+  td12.appendText(" place them. See ");
+  td12.createEl('code', { cls: 'places-environment-help-code', text: "places-queryparameters-help" });
+  const td13 = row14.createEl('td');
+  td13.createEl('code', { cls: 'places-environment-help-code', text: "- name: limit" });
 }

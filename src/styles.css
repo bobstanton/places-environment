@@ -1,5 +1,3 @@
-/* Loading state containers - adds padding when loading
- * Spinner and text styles come from places-shared/loading-styles.css. */
 .tide-table-loading,
 .tide-chart-loading,
 .weather-widget-loading,
@@ -11,7 +9,6 @@
   text-align: center;
 }
 
-/* Container styles - DESIGN LANGUAGE STANDARD */
 .tide-table-container {
   width: 100%;
   position: relative;
@@ -21,7 +18,6 @@
   overflow: hidden;
 }
 
-/* Chart container - for Chart.js canvases */
 .solar-chart-canvas,
 .tide-chart-canvas {
   position: relative;
@@ -29,8 +25,6 @@
   height: var(--places-chart-height, 400px);
 }
 
-/* Solar table - mirrors the tide container so floating buttons anchor and the
-   table fills the block width. */
 .solar-table-container {
   width: 100%;
   position: relative;
@@ -81,15 +75,12 @@
   background: var(--background-modifier-hover);
 }
 
-/* Tide markdown-style table (places-tide-table) */
 .tide-data-table {
   width: 100%;
   margin: 0;
   border-collapse: collapse;
 }
 
-/* Obsidian applies a more-specific top margin to tables in rendered Markdown.
-   The primary tide table should continue directly from the station header. */
 .tide-table-container > .tide-data-table {
   margin-block-start: 0;
   margin-top: 0;
@@ -117,7 +108,6 @@
   margin: var(--size-4-3) var(--size-4-3) var(--size-2-2);
 }
 
-/* Station info */
 .tide-station-info {
   margin: 0;
   padding: var(--size-4-5) var(--size-4-6);
@@ -140,8 +130,6 @@
   color: var(--text-muted);
 }
 
-/* tide-station-distance: the tide header now carries distance in its title;
-   the class remains for the solar chart's coordinate display. */
 .tide-station-distance,
 .tide-station-datum,
 .tide-station-units {
@@ -230,15 +218,14 @@
   margin-left: var(--size-4-2);
 }
 
-/* Solar information */
 .tide-solar-info {
   position: relative;
   margin: var(--size-4-1) 0;
   padding: var(--size-4-1) var(--size-4-2);
   background: linear-gradient(to right, 
-    rgba(59, 130, 246, 0.1) 0%,   /* Dawn blue */
-    rgba(251, 191, 36, 0.1) 50%,  /* Noon yellow */
-    rgba(129, 140, 248, 0.1) 100% /* Dusk purple */
+    rgba(59, 130, 246, 0.1) 0%,    
+    rgba(251, 191, 36, 0.1) 50%,   
+    rgba(129, 140, 248, 0.1) 100%  
   );
   border-radius: var(--radius-s);
   font-size: var(--font-ui-smaller);
@@ -313,7 +300,7 @@
 
 .tide-events-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* Always 4 columns, each 1/4 width */
+  grid-template-columns: repeat(4, 1fr);  
   gap: var(--size-4-1);
 }
 
@@ -366,25 +353,22 @@
   color: var(--text-normal);
 }
 
-/* Chart styles - DESIGN LANGUAGE STANDARD */
 .tide-chart-container {
   width: 100%;
   position: relative;
   background: var(--background-primary);
   border-radius: var(--radius-m);
-  padding: 0; /* DESIGN LANGUAGE COMPLIANCE: No padding to maximize chart width */
+  padding: 0;  
 }
 
-/* Solar chart styles - DESIGN LANGUAGE STANDARD */
 .solar-chart-container {
   width: 100%;
   position: relative;
   background: var(--background-primary);
   border-radius: var(--radius-m);
-  padding: 0; /* DESIGN LANGUAGE COMPLIANCE: No padding to maximize chart width */
+  padding: 0;  
 }
 
-/* Solar summary row (sunrise / solar noon / sunset / day length) */
 .solar-summary {
   display: flex;
   flex-wrap: wrap;
@@ -397,7 +381,6 @@
   min-width: 110px;
 }
 
-/* Aligned variant: each item is positioned under its event's x-position on the arc. */
 .solar-summary-aligned {
   display: block;
   position: relative;
@@ -432,17 +415,14 @@
   color: var(--text-muted);
 }
 
-/* Twilight & daylight band */
 
 
 
 
 
-/* Solar-noon marker on the band (gold), distinct from the red "now" line. */
 
 
 
-/* Keep the first/last labels inside the band's edges instead of centering on them. */
 
 
 .solar-band-legend {
@@ -453,7 +433,6 @@
   padding: 0 var(--size-4-3) var(--size-4-3);
 }
 
-/* Per-day section in a multi-day solar chart */
 .solar-day:not(:last-child) {
   border-bottom: 1px solid var(--background-modifier-border);
   padding-bottom: var(--size-4-2);
@@ -487,7 +466,6 @@
 .solar-band-swatch-civil { background-color: #6aa9e9; }
 .solar-band-swatch-day { background-color: #cfe8f7; }
 
-/* Thin gold line swatch representing the solar-noon marker. */
 .solar-noon-swatch {
   width: 3px;
   border-radius: 0;
@@ -495,8 +473,6 @@
 }
 
 
-/* Show floating buttons on container hover
- * Floating button styles come from places-shared/button-styles.css. */
 .tide-table-container:hover .places-floating-buttons,
 .tide-chart-container:hover .places-floating-buttons,
 .weather-current-container:hover .places-floating-buttons,
@@ -512,7 +488,6 @@
   pointer-events: auto;
 }
 
-/* Subtle visual indicators */
 .tide-event-card.tide-high .tide-event-height::before {
   content: "H";
   font-size: var(--font-ui-smaller);
@@ -529,7 +504,6 @@
   font-weight: var(--font-weight-semibold);
 }
 
-/* Desktop layout - keep time and height on same line */
 @media (min-width: 769px) {
   .tide-event-info {
     display: flex;
@@ -549,7 +523,6 @@
   }
 }
 
-/* Responsive design - Enhanced mobile layout */
 @media (max-width: 768px) {
   .solar-summary {
     display: grid;
@@ -631,14 +604,13 @@
   
 }
 
-/* Improved mobile layout - ensure 2 cards minimum */
 @media (max-width: 480px) {
   .solar-summary {
     grid-template-columns: 1fr;
   }
 
   .tide-events-grid {
-    grid-template-columns: repeat(2, 1fr); /* Keep 2 columns on small screens */
+    grid-template-columns: repeat(2, 1fr);  
     gap: var(--size-4-1);
   }
   
@@ -674,7 +646,6 @@
   
 }
 
-/* Dark mode adjustments */
 .theme-dark .tide-loading-spinner {
   border-color: var(--background-modifier-border);
   border-top-color: var(--interactive-accent);
@@ -706,9 +677,7 @@
   border-bottom: 1px solid var(--background-modifier-border);
 }
 
-/* Settings tab styles - cleaned up since we now use standard Setting components */
 
-/* Moon phase context */
 .tide-moon-info {
   margin: var(--size-4-1) 0;
   padding: var(--size-4-1) var(--size-4-2);
@@ -723,7 +692,6 @@
 }
 
 
-/* Settings tab attribution styles */
 .setting-item-description a {
   color: var(--interactive-accent);
   text-decoration: none;
@@ -734,7 +702,6 @@
   text-decoration: underline;
 }
 
-/* Settings attribution section */
 .places-environment-attribution {
   margin-bottom: var(--size-4-6);
   padding: var(--size-4-2);
@@ -749,7 +716,6 @@
   margin-top: var(--size-4-3);
 }
 
-/* Tide Station Search Modal - Custom styling for mixed font weights */
 .tide-station-name-state {
   font-weight: var(--font-weight-medium);
 }
@@ -759,17 +725,12 @@
   color: var(--text-muted);
 }
 
-/* Ensure consistent styling with existing place suggestion items */
 .place-suggestion-item .tide-station-name-state,
 .place-suggestion-item .tide-station-id {
-  display: inline; /* Keep them on the same line */
+  display: inline;  
 }
 
-/* ============================================
-   WEATHER STYLES - Open-Meteo Integration
-   ============================================ */
 
-/* Weather Widget Styles */
 .weather-widget {
   display: flex;
   flex-direction: column;
@@ -780,7 +741,6 @@
   border: 1px solid var(--background-modifier-border);
 }
 
-/* Top row: main info + sparkline side by side */
 .weather-widget-top-row {
   display: flex;
   align-items: center;
@@ -810,7 +770,6 @@
   color: var(--text-muted);
 }
 
-/* Details row below (includes attribution inline) */
 .weather-widget-details {
   display: flex;
   align-items: center;
@@ -842,7 +801,6 @@
 }
 
 
-/* Weather Sparkline (15-min trend) - wider for 6-hour range */
 .weather-widget-sparkline {
   display: flex;
   align-items: stretch;
@@ -850,12 +808,11 @@
   width: 240px;
   flex-shrink: 0;
   margin-left: auto;
-  margin-right: 40px; /* Permanent space for floating refresh button */
+  margin-right: 40px;  
   padding-left: var(--size-4-3);
   border-left: 1px solid var(--background-modifier-border);
 }
 
-/* Narrow screen: stack sparkline below main */
 @media (max-width: 500px) {
   .weather-widget-top-row {
     flex-direction: column;
@@ -872,7 +829,6 @@
   }
 }
 
-/* Y-axis labels on left (max at top, min at bottom) */
 .weather-sparkline-yaxis {
   display: flex;
   flex-direction: column;
@@ -880,7 +836,7 @@
   font-size: var(--font-ui-smaller);
   color: var(--text-muted);
   text-align: right;
-  padding: 4px 0 16px 0; /* Match SVG padding */
+  padding: 4px 0 16px 0;  
 }
 
 .weather-sparkline-max {
@@ -891,7 +847,6 @@
   color: var(--text-faint);
 }
 
-/* Chart area (SVG with embedded time labels) */
 .weather-sparkline-chart-area {
   display: flex;
   flex-direction: column;
@@ -904,7 +859,6 @@
   height: 56px;
 }
 
-/* Weather severity classes */
 .weather-clear {
   border-left: 3px solid var(--color-green);
 }
@@ -921,7 +875,6 @@
   border-left: 3px solid var(--color-red);
 }
 
-/* Weather Chart Styles */
 .weather-chart-container {
   position: relative;
   width: 100%;
@@ -938,12 +891,10 @@
   width: 100%;
 }
 
-/* Weather Forecast Styles */
 .weather-forecast-container {
   position: relative;
 }
 
-/* Seasonal forecast quality badge */
 .weather-seasonal-badge {
   display: inline-flex;
   align-items: center;
@@ -998,6 +949,63 @@
 
 .weather-forecast-card:hover {
   box-shadow: var(--shadow-s);
+}
+
+.places-environment-weather-popup {
+  display: grid;
+  gap: var(--size-4-3);
+  min-width: min(240px, 70vw);
+}
+
+.places-environment-weather-popup-header {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-2);
+}
+
+.places-environment-weather-popup-icon {
+  flex: 0 0 auto;
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.places-environment-weather-popup-heading {
+  min-width: 0;
+}
+
+.places-environment-weather-popup-condition {
+  color: var(--text-normal);
+  font-size: var(--font-ui-medium);
+  font-weight: var(--font-weight-semibold);
+}
+
+.places-environment-weather-popup-date,
+.places-environment-weather-popup-label {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.places-environment-weather-popup-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.places-environment-weather-popup-metric {
+  min-width: 0;
+  padding: var(--size-4-2) var(--size-4-2) 0 0;
+}
+
+.places-environment-weather-popup-value {
+  overflow-wrap: anywhere;
+  color: var(--text-normal);
+  font-size: var(--font-ui-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.places-environment-weather-popup-summary {
+  color: var(--text-normal);
+  font-size: var(--font-ui-small);
 }
 
 .weather-forecast-date {
@@ -1070,7 +1078,6 @@
   color: var(--color-gray-7);
 }
 
-/* Weather Template Styles */
 .weather-template-container {
   position: relative;
 }
@@ -1079,7 +1086,6 @@
   padding: var(--size-4-2);
 }
 
-/* Note: Error displays use .places-error from places-shared error styles. */
 
 .weather-template-default {
   padding: var(--size-4-3);
@@ -1102,7 +1108,6 @@
   color: var(--text-muted);
 }
 
-/* Weather Attribution (Open-Meteo CC BY 4.0 license requirement) */
 .weather-attribution {
   display: flex;
   align-items: center;
@@ -1112,7 +1117,7 @@
   color: var(--text-muted);
   opacity: 0.7;
   text-align: right;
-  margin-left: auto; /* Push to right in flex containers */
+  margin-left: auto;  
 }
 
 .weather-attribution a {
@@ -1126,7 +1131,6 @@
   opacity: 1;
 }
 
-/* Attribution positioned absolutely for all container types */
 .weather-chart-container .weather-attribution,
 .weather-forecast-container .weather-attribution,
 .weather-hourly-container .weather-attribution {
@@ -1136,28 +1140,24 @@
   margin: 0;
 }
 
-/* Weather Day View Styles - Compact horizontal scrolling */
 .weather-hourly-container {
   position: relative;
 }
 
-/* Stack day cards together with only outer corners rounded */
 .weather-hourly-container .weather-day-card {
   position: relative;
   background: var(--background-secondary);
   border-radius: 0;
   border: 1px solid var(--background-modifier-border);
-  border-bottom: none; /* Avoid double borders between cards */
+  border-bottom: none;  
   overflow: hidden;
 }
 
-/* First card: round top corners only */
 .weather-hourly-container .weather-day-card:first-child {
   border-top-left-radius: var(--radius-m);
   border-top-right-radius: var(--radius-m);
 }
 
-/* Last card: round bottom corners only, restore bottom border. */
 .weather-hourly-container .weather-day-card-last {
   border-bottom-left-radius: var(--radius-m);
   border-bottom-right-radius: var(--radius-m);
@@ -1200,10 +1200,47 @@
   transition: margin-right 0.25s ease;
 }
 
-/* Slide summary over on hover to make room for floating buttons */
-.weather-hourly-container:hover .weather-day-summary,
-.weather-minutely15-container:hover .weather-day-summary {
-  margin-right: 70px;
+@media (hover: hover) and (pointer: fine) {
+  body:not(.is-mobile) .weather-hourly-container:hover .weather-day-summary,
+  body:not(.is-mobile) .weather-minutely15-container:hover .weather-day-summary {
+    margin-right: 70px;
+  }
+}
+
+.is-mobile .block-language-places-weather .weather-day-card:first-child .weather-day-header {
+  padding-right: calc(var(--size-4-3, 12px) + 70px);
+}
+
+.is-mobile .block-language-places-weather .weather-widget-main {
+  padding-right: 70px;
+  flex-shrink: 1;
+}
+
+.is-mobile .block-language-places-weather .weather-widget-sparkline {
+  margin-right: 0;
+}
+
+.is-mobile .block-language-places-weather .weather-day-header {
+  flex-wrap: wrap;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .block-language-places-weather .weather-day-card:first-child .weather-day-header {
+    padding-right: calc(var(--size-4-3, 12px) + 70px);
+  }
+
+  .block-language-places-weather .weather-widget-main {
+    padding-right: 70px;
+    flex-shrink: 1;
+  }
+
+  .block-language-places-weather .weather-widget-sparkline {
+    margin-right: 0;
+  }
+
+  .block-language-places-weather .weather-day-header {
+    flex-wrap: wrap;
+  }
 }
 
 .weather-day-highlow {
@@ -1225,7 +1262,6 @@
   white-space: nowrap;
 }
 
-/* Horizontal scrolling row of hours */
 .weather-day-hours-row {
   display: flex;
   gap: var(--size-4-1);
@@ -1261,7 +1297,6 @@
   --precip-height: 0%;
 }
 
-/* Precipitation background fill - grows from bottom based on relative precipitation */
 .weather-day-hour-has-precip::before {
   content: '';
   position: absolute;
@@ -1279,7 +1314,6 @@
   border-radius: 0 0 var(--radius-s) var(--radius-s);
 }
 
-/* Ensure content is above the precip background */
 .weather-day-hour-has-precip > * {
   position: relative;
   z-index: 1;
@@ -1318,7 +1352,6 @@
   color: var(--color-blue);
 }
 
-/* Responsive Weather Styles */
 @media (max-width: 768px) {
   .weather-forecast-grid {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -1353,7 +1386,6 @@
   }
 }
 
-/* Dark mode adjustments for weather */
 .theme-dark .weather-widget {
   background: var(--background-primary-alt);
 }
@@ -1370,7 +1402,6 @@
   background: var(--background-primary-alt);
 }
 
-/* Weather Table Styles */
 .weather-table-container {
   position: relative;
 }
@@ -1387,8 +1418,6 @@
   white-space: nowrap;
 }
 
-/* Obsidian applies a top margin to tables in rendered Markdown; the weather
-   table starts flush at the top of its block. */
 .weather-table-container .weather-table {
   margin-block-start: 0;
   margin-top: 0;
@@ -1405,8 +1434,6 @@
   top: 0;
 }
 
-/* Some themes column-stripe table headers via `th:nth-child`, which outranks the
-   bare `.weather-table th` rule. Scope-override so every header cell is one grey. */
 .weather-table-container .weather-table th {
   background: var(--background-secondary);
 }
@@ -1421,7 +1448,6 @@
   background: var(--background-secondary-alt);
 }
 
-/* Weather severity row coloring */
 .weather-table tbody tr.weather-severe {
   background: rgba(239, 68, 68, 0.1);
 }
@@ -1446,7 +1472,6 @@
   background: rgba(59, 130, 246, 0.12);
 }
 
-/* New day separator row (midnight) */
 .weather-table tbody tr.weather-table-new-day {
   border-top: 2px solid var(--background-modifier-border);
 }
@@ -1455,19 +1480,16 @@
   font-weight: var(--font-semibold);
 }
 
-/* Weather emoji column */
 .weather-table-emoji {
   font-size: 1.2em;
   text-align: center;
 }
 
-/* Attribution for table */
 .weather-table-container .weather-attribution {
   text-align: right;
   padding-top: var(--size-2-1);
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .weather-table {
     font-size: var(--font-ui-smaller);
@@ -1479,7 +1501,6 @@
   }
 }
 
-/* Dark mode for weather table */
 .theme-dark .weather-table th {
   background: var(--background-primary-alt);
 }
@@ -1488,7 +1509,6 @@
   background: var(--background-modifier-hover);
 }
 
-/* Staleness indicator: rendered only when cached data was served after a failed refresh */
 .places-data-freshness {
   margin-top: var(--size-2-2);
   font-size: var(--font-ui-smaller);
@@ -1504,18 +1524,12 @@
 }
 
 
-/* =============================================================================
- * Generated help tables - identical presentation to the main plugin's
- * places-help-table rules; each plugin carries its own copy because plugin
- * styles are self-contained.
- * ============================================================================= */
 .places-environment-help-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: var(--size-4-2);
 }
 
-/* Horizontal scroll for wide tables */
 .places-environment-help-table-scroll,
 .places-environment-help-table-wrapper {
   max-width: 100%;
@@ -1541,9 +1555,6 @@
   border-bottom: 1px solid var(--background-modifier-border);
 }
 
-/* Obsidian's app.css stripes header columns (.markdown-rendered thead tr > th:nth-child(2n+2)
-   with var(--table-column-alt-background)). Out-specify it so every help-table header cell
-   keeps the same background. */
 .markdown-rendered .places-environment-help-table thead tr > th:nth-child(2n+2),
 .cm-html-embed .places-environment-help-table thead tr > th:nth-child(2n+2),
 .places-environment-help-table thead tr > th:nth-child(2n+2) {
@@ -1555,8 +1566,6 @@
   border-bottom: 1px solid var(--background-modifier-border);
 }
 
-/* No row hover highlight. Obsidian's app.css tints rows on hover
-   (.markdown-rendered tbody tr:hover, var(--table-row-background-hover)); out-specify it. */
 .markdown-rendered .places-environment-help-table tbody tr:hover,
 .cm-html-embed .places-environment-help-table tbody tr:hover,
 .places-environment-help-table tbody tr:hover {

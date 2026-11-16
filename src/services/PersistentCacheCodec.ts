@@ -1,4 +1,4 @@
-import { StringCompressor } from 'places-shared/utils';
+import { StringCompressor } from "places-shared/utils";
 
 export interface ZstdCachePayload {
   codec: 'zstd-json-v1';
@@ -14,9 +14,11 @@ export function isZstdCachePayload(value: unknown): value is ZstdCachePayload {
 
 export function encodeCachePayload(data: unknown): ZstdCachePayload {
   const json = JSON.stringify(data);
+
   if (json === undefined) {
     throw new Error('Environmental cache values must be JSON-serializable.');
   }
+
   return {
     codec: 'zstd-json-v1',
     value: StringCompressor.compressAndEncode(json),

@@ -58,21 +58,24 @@ Hourly and minutely15 series can share one chart; the minutely15 labels pick up 
 
 ## Settings
 
-| Setting | Description | Examples |
-| ------- | ----------- | -------- |
-| coordinates | `lat, lon` or `Name: lat, lon` (or use frontmatter Location) | 41.408, -75.662 |
-| location | Alternative to coordinates using the same named-coordinate format | 41.408, -75.662 |
-| hourly | Hourly variables to chart | **temperature_2m** |
-| minutely15 | 15-minute resolution variables for higher precision |  |
-| startDate | Start date | **today**, tomorrow, +3d, 2025-08-15 |
-| endDate | End date | **+3d**, +5d, +1w, 2025-08-20 |
-| startTime | Filter hours from this time (e.g., `6`, `6am`, `06:00`) | 6am, 14:00 |
-| endTime | Filter hours until this time (e.g., `21`, `9pm`, `21:00`) | 6pm, 18:00 |
-| height | Chart height | **400px**, 50vh |
-| width | Chart width | **100%**, 400px |
-| units | Unit system. Defaults to the global units setting | metric, imperial |
-| cache | How long cached data stays fresh: a duration, an expiration date (a bare date expires at the end of that day), or `forever` | **true**, false, forever, 30m, 7d, 2027-01-01 |
-| cellSelection | Grid cell preference | **land**, sea, nearest |
+| Setting         | Description                                                                                                                                                                            | Examples                                      |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| coordinates     | `lat, lon` or `Name: lat, lon` (or use frontmatter Location)                                                                                                                           | 41.408, -75.662                               |
+| location        | Alternative to coordinates using the same named-coordinate format                                                                                                                      | 41.408, -75.662                               |
+| hourly          | Hourly variables to chart                                                                                                                                                              | **temperature_2m**                            |
+| minutely15      | 15-minute resolution variables for higher precision                                                                                                                                    |                                               |
+| startDate       | Start date                                                                                                                                                                             | **today**, tomorrow, +3d, 2025-08-15          |
+| endDate         | End date                                                                                                                                                                               | **+3d**, +5d, +1w, 2025-08-20                 |
+| startTime       | Filter hours from this time (e.g., `6`, `6am`, `06:00`)                                                                                                                                | 6am, 14:00                                    |
+| endTime         | Filter hours until this time (e.g., `21`, `9pm`, `21:00`)                                                                                                                              | 6pm, 18:00                                    |
+| height          | Chart height                                                                                                                                                                           | **400px**, 50vh                               |
+| width           | Width of everything the block renders, its legend and info included. A percentage measures the note's width, vw the window's                                                           | **100%**, 400px                               |
+| units           | Unit system. Defaults to the global units setting                                                                                                                                      | metric, imperial                              |
+| cache           | How long cached data stays fresh: a duration, an expiration date (a bare date expires at the end of that day), or `forever`                                                            | **true**, false, forever, 30m, 7d, 2027-01-01 |
+| cellSelection   | Grid cell preference                                                                                                                                                                   | **land**, sea, nearest                        |
+| daily           | Daily weather variables to chart                                                                                                                                                       | temperature_2m_max, precipitation_sum         |
+| days            | Calendar days to display when `endDate` is omitted                                                                                                                                     | 1, 3, **7**, 14                               |
+| queryParameters | UI controls that adjust the block without editing it; `queryParametersPosition`, `queryParametersLayout`, and `queryParametersCollapsed` place them. See `places-queryparameters-help` | `- name: limit`                               |
 
 ## Hourly Variables
 

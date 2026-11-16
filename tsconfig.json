@@ -19,7 +19,12 @@
       "DOM.Iterable",
       "ES2020"
     ],
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "places-environment/core": [
+        "./src/core/index.ts"
+      ]
+    }
   },
   "include": [
     "**/*.ts",

@@ -1,10 +1,8 @@
-import { MarkdownPostProcessorContext, loadPrism, setIcon, Component, App } from 'obsidian';
+import * as _placesDom from 'places-shared/utils';
+import { type MarkdownPostProcessorContext, Component, type App, loadPrism, setIcon } from "obsidian";
+import { renderProviderTables } from "../core/blocks/renderProviderTables";
 import { renderError } from "places-shared/utils";
 import type { RenderContext } from '../generated-help/types.generated';
-import type { ProviderTableDefinition } from 'vaultquery/api';
-import { weatherTableDefinitions } from '../services/VaultQueryWeatherProvider';
-import { tideTableDefinitions } from '../services/VaultQueryTideProvider';
-import { solarTableDefinitions } from '../services/VaultQuerySolarProvider';
 
 import * as weatherHelp from '../generated-help/weather-help.generated';
 import * as weatherChartHelp from '../generated-help/weather-chart-help.generated';
@@ -57,7 +55,7 @@ export class WeatherHelpProcessor {
       app: this.plugin.app,
       component: this.component,
       renderDynamic: (parent: HTMLElement, key: string) => {
-        if (key === 'vaultqueryTables') this.renderVaultQueryTables(parent);
+        if (key === 'vaultqueryTables') renderProviderTables(parent);
       },
       setIcon: (element: HTMLElement, iconId: string) => {
         setIcon(element, iconId);
@@ -113,44 +111,19 @@ export class WeatherHelpProcessor {
     this.renderHelp(el, 'places-vaultquery-tables-help');
   }
 
-  // Rendered from the same ProviderTableDefinitions that create the tables.
-  private renderVaultQueryTables(container: HTMLElement): void {
-    const definitions: ProviderTableDefinition[] = [...weatherTableDefinitions(), ...tideTableDefinitions(), ...solarTableDefinitions()];
-    for (const definition of definitions) {
-      container.createEl('h3').createEl('code', { text: definition.name });
-      if (definition.description) container.createEl('p', { text: definition.description });
-
-      const wrapper = container.createDiv('places-environment-help-table-wrapper');
-      const table = wrapper.createEl('table', { cls: 'places-environment-help-table' });
-      const head = table.createEl('thead').createEl('tr');
-      for (const label of ['Column', 'Type', 'Notes']) head.createEl('th', { text: label });
-
-      const body = table.createEl('tbody');
-      for (const column of definition.columns) {
-        const row = body.createEl('tr');
-        row.createEl('td').createEl('code', { text: column.name });
-        row.createEl('td', { text: column.type });
-        const notes: string[] = [];
-        if (definition.primaryKey.includes(column.name)) notes.push('primary key');
-        else if (column.nullable === false) notes.push('required');
-        row.createEl('td', { text: notes.join(', ') });
-      }
-    }
-  }
-
   private renderHelp(el: HTMLElement, helpType: string): void {
-    el.addClass('places-environment-help');
+    _placesDom.addClass(el, 'places-environment-help');
 
     const helpModule = this.helpModules.get(helpType);
+
     if (!helpModule) {
       renderError(el, { icon: '❓', title: 'Unknown Help Topic', message: `No help found for: ${helpType}` });
+
       return;
     }
 
-    const helpContainer = el.createDiv('places-environment-help-container');
-    // yaml display fences fall back to Obsidian's Prism at render time; load
-    // it first, leaving the fallback with Prism.languages populated. Rendering
-    // proceeds unhighlighted if Prism cannot load.
+    const helpContainer = _placesDom.createDiv(el, 'places-environment-help-container');
+
     void loadPrism().catch(() => undefined).then(() => {
       helpModule.render(helpContainer, this.createRenderContext());
     });

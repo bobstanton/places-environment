@@ -142,7 +142,7 @@ export function render(container: HTMLElement, _ctx: RenderContext): void {
   row15.createEl('td', { text: "400px, 50vh" });
   const row16 = tbody1.createEl('tr');
   row16.createEl('td', { text: "width" });
-  row16.createEl('td', { text: "Optional chart/table width" });
+  row16.createEl('td', { text: "Width of everything the block renders, its legend and info included. A percentage measures the note's width, vw the window's" });
   row16.createEl('td', { text: "100%, 400px" });
   const para1 = container.createEl('p', { cls: 'places-environment-help-paragraph' });
   para1.createEl('code', { cls: 'places-environment-help-code', text: "location" });

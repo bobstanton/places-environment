@@ -1,5 +1,6 @@
-import { COMMON_CACHE_PARAM, COMMON_SIZE_PARAMS, COMMON_SIZE_KEYS, BOOLEAN_VALUES, QUERY_PARAMETER_NESTED_KEYS, UNIT_VALUES } from "places-shared/settings";
-import { CodeBlockDefinition, CodeBlockHighlightConfig } from "places-shared/services";
+import { weatherVariableDetail, TIDE_UNIT_DETAILS } from "places-environment/core";
+import { COMMON_CACHE_PARAM, COMMON_SIZE_PARAMS, COMMON_SIZE_KEYS, QUERY_PARAMETER_NESTED_KEYS } from "places-shared/settings";
+import { CodeBlockDefinition, CodeBlockHighlightConfig } from "places-shared/obsidian/services";
 
 const WEATHER_CURRENT_VARIABLES = [
   'temperature_2m',
@@ -142,6 +143,18 @@ const WEATHER_DAILY_VARIABLES = [
   'shortwave_radiation_sum',
   'et0_fao_evapotranspiration',
 ];
+const WEATHER_VARIABLE_DETAILS: Record<string, Record<string, string>> = (() => {
+  const details = Object.fromEntries([
+    ...WEATHER_CURRENT_VARIABLES, ...WEATHER_MINUTELY15_VARIABLES, ...WEATHER_HOURLY_VARIABLES, ...WEATHER_DAILY_VARIABLES,
+  ].flatMap(variable => {
+    const detail = weatherVariableDetail(variable);
+
+    return detail ? [[variable, detail]] : [];
+  }));
+
+  return { current: details, minutely15: details, hourly: details, daily: details };
+})();
+
 const WEATHER_TABLE_COLUMNS = [
   'time',
   'date',
@@ -203,40 +216,40 @@ const WEATHER_TABLE_DAILY_COLUMNS = [
 const COMMON_WEATHER_PARAMS = [
   { name: "coordinates", description: "Optional name followed by latitude and longitude; separate multiple locations with semicolons", values: "Scranton: 41.408,-75.662" },
   { name: "location", description: "Alternative location key; accepts Name: lat, lon and falls back to the note's Location property", values: "Scranton: 41.408,-75.662 or note's Location" },
-  { name: "days", description: "Calendar days to display when endDate is omitted", values: "1, 3, **7**, 14" },
-  { name: "startDate", description: "First day to fetch. Defaults to today", values: "**today**, tomorrow, 2024-01-01" },
-  { name: "endDate", description: "Last day to fetch, inclusive", values: "**+6**, +6d, 2024-01-07" },
-  { name: "startTime", description: "Start hour filter for hourly data", values: "6am, 8, 06:00" },
-  { name: "endTime", description: "End hour filter for hourly data", values: "10pm, 22, 22:00" },
-  { name: "units", description: "Unit system. Defaults to the global units setting", values: "metric, imperial" },
+  { name: "days", description: "Calendar days to display when endDate is omitted", values: { examples: ["1", "3", "7", "14"], default: "7" } },
+  { name: "startDate", description: "First day to fetch. Defaults to today", values: { examples: ["today", "tomorrow", "2024-01-01"], default: "today" } },
+  { name: "endDate", description: "Last day to fetch, inclusive", values: { examples: ["+6", "+6d", "2024-01-07"], default: "+6" } },
+  { name: "startTime", description: "Start hour filter for hourly data", values: { examples: ["6am", "8", "06:00"] } },
+  { name: "endTime", description: "End hour filter for hourly data", values: { examples: ["10pm", "22", "22:00"] } },
+  { name: "units", description: "Unit system. Defaults to the global units setting", values: { choices: ["metric", "imperial"] } },
   COMMON_CACHE_PARAM,
-  { name: "cellSelection", description: "Weather grid cell preference for coastal areas", values: "**land**, sea, nearest" },
+  { name: "cellSelection", description: "Weather grid cell preference for coastal areas", values: { choices: ["land", "sea", "nearest"], default: "land" } },
 ];
 
 const WEATHER_VARIABLE_PARAMS = [
-  { name: "current", description: "Current weather variables", values: "temperature_2m, weather_code" },
-  { name: "minutely15", description: "15-minute weather variables", values: "temperature_2m, precipitation" },
-  { name: "hourly", description: "Hourly weather variables", values: "temperature_2m, precipitation" },
-  { name: "daily", description: "Daily weather variables", values: "temperature_2m_max, weather_code" },
+  { name: "current", description: "Current weather variables", values: { examples: ["temperature_2m", "weather_code"] } },
+  { name: "minutely15", description: "15-minute weather variables", values: { examples: ["temperature_2m", "precipitation"] } },
+  { name: "hourly", values: { examples: ["temperature_2m", "precipitation"] } },
+  { name: "daily", description: "Daily weather variables", values: { examples: ["temperature_2m_max", "weather_code"] } },
 ];
 
-const DEBUG_PARAM = { name: "debug", description: "Show a table of how every setting resolved across default, global, frontmatter, and block layers", values: "settings" };
+const DEBUG_PARAM = { name: "debug", description: "Show a table of how every setting resolved across default, global, frontmatter, and block layers", values: { examples: ["settings"] } };
 const PARAMETER_KEYS = ['queryParameters', 'queryParametersPosition', 'queryParametersLayout', 'queryParametersCollapsed'];
 const PARAMETER_NESTED_KEYS = { queryParameters: QUERY_PARAMETER_NESTED_KEYS };
 
 const COMMON_TIDE_PARAMS = [
   ...COMMON_SIZE_PARAMS,
-  { name: "location", description: "Coordinates for nearest station", values: "39.355,-74.418" },
-  { name: "station", description: "Station name to search", values: "\"Battery Park\"" },
-  { name: "stationId", description: "Fetches this station directly, skipping the nearest-station lookup", values: "8518750" },
-  { name: "datum", description: "Reference level heights are measured from", values: "**MLLW**, NAVD88, STND" },
-  { name: "units", description: "Unit system. Defaults to the global units setting", values: "metric, imperial" },
-  { name: "days", description: "Calendar days to display when endDate is omitted", values: "**2**, 1, 7, 14" },
-  { name: "startDate", description: "First day to fetch. Defaults to today", values: "**today**, 2024-01-01" },
-  { name: "endDate", description: "Last day to fetch, inclusive", values: "**+1**, +1d, 2024-01-02" },
-  { name: "showStation", description: "Show the station header (name, type, distance, datum)", values: "**true**, false" },
-  { name: "showMap", description: "Show a map of the requested coordinates and the answering station", values: "**false**, true" },
-  { name: "mapProvider", description: "Map provider for showMap", values: "openfreemap, leaflet" },
+  { name: "location", description: "Coordinates for nearest station", values: { examples: ["39.355,-74.418"] } },
+  { name: "station", description: "Station name to search", values: { examples: ["\"Atlantic City\""] } },
+  { name: "stationId", description: "Fetches this station directly, skipping the nearest-station lookup", values: { examples: ["8534720"] } },
+  { name: "datum", description: "Reference level heights are measured from", values: { choices: ["MLLW", "NAVD88", "STND"], default: "MLLW" } },
+  { name: "units", description: "Unit system. Defaults to the global units setting", values: { choices: ["metric", "imperial"] } },
+  { name: "days", description: "Calendar days to display when endDate is omitted", values: { examples: ["2", "1", "7", "14"], default: "2" } },
+  { name: "startDate", description: "First day to fetch. Defaults to today", values: { examples: ["today", "2024-01-01"], default: "today" } },
+  { name: "endDate", description: "Last day to fetch, inclusive", values: { examples: ["+1", "+1d", "2024-01-02"], default: "+1" } },
+  { name: "showStation", description: "Show the station header (name, type, distance, datum)", values: { choices: ["true", "false"], default: "true" } },
+  { name: "showMap", description: "Show a map of the requested coordinates and the answering station", values: { examples: ["false", "true"], default: "false" } },
+  { name: "mapProvider", description: "Map provider for showMap", values: "any installed map provider" },
 ];
 
 const TIDES_CODE_BLOCK_DEFINITIONS: CodeBlockDefinition[] = [
@@ -246,9 +259,9 @@ const TIDES_CODE_BLOCK_DEFINITIONS: CodeBlockDefinition[] = [
     parameters: [
       ...COMMON_TIDE_PARAMS,
       DEBUG_PARAM,
-      { name: "showSolar", description: "Solar event rows (sunrise, sunset, dawn, dusk)", values: "**false**, true" },
-      { name: "showMoonPhases", description: "Observed tidal range and moon phase rows", values: "**false**, true" },
-      { name: "exportHourlyEstimates", description: "Include hourly data", values: "**false**, true" },
+      { name: "showSolar", description: "Solar event rows (sunrise, sunset, dawn, dusk)", values: { choices: ["false", "true"], default: "false" } },
+      { name: "showMoonPhases", description: "Observed tidal range and moon phase rows", values: { choices: ["false", "true"], default: "false" } },
+      { name: "exportHourlyEstimates", description: "Include hourly data", values: { choices: ["false", "true"], default: "false" } },
       COMMON_CACHE_PARAM
     ]
   },
@@ -258,9 +271,9 @@ const TIDES_CODE_BLOCK_DEFINITIONS: CodeBlockDefinition[] = [
     parameters: [
       ...COMMON_TIDE_PARAMS,
       DEBUG_PARAM,
-      { name: "showSolar", description: "Solar events on cards", values: "**false**, true" },
-      { name: "showMoonPhases", description: "Moon phase context on cards", values: "**false**, true" },
-      { name: "exportHourlyEstimates", description: "Include hourly data", values: "**false**, true" },
+      { name: "showSolar", description: "Solar events on cards", values: { choices: ["false", "true"], default: "false" } },
+      { name: "showMoonPhases", description: "Moon phase context on cards", values: { choices: ["false", "true"], default: "false" } },
+      { name: "exportHourlyEstimates", description: "Include hourly data", values: { choices: ["false", "true"], default: "false" } },
       COMMON_CACHE_PARAM
     ]
   },
@@ -277,18 +290,18 @@ const TIDES_CODE_BLOCK_DEFINITIONS: CodeBlockDefinition[] = [
     type: "places-tides-vaultquery",
     description: "Tide materialized table definition for VaultQuery",
     parameters: [
-      { name: "id", description: "Stable query identifier", values: "battery-park" },
-      { name: "name", description: "Display name", values: "Battery Park" },
-      { name: "location", description: "Coordinates for nearest station; supports up to 10 total tide sources separated by ;", values: "39.355,-74.418; 40.7003,-74.0142" },
-      { name: "station", description: "Station name to search; supports multiple separated by ;", values: "\"Battery Park\"; Boston" },
-      { name: "stationId", description: "NOAA station ID; supports multiple separated by ;", values: "8518750; 8443970" },
-      { name: "maxStations", description: "Nearby stations to pull per location (total capped at 10)", values: "**1**, 3, 5, 10" },
-      { name: "datum", description: "Reference level heights are measured from", values: "**MLLW**, NAVD88, STND" },
-      { name: "units", description: "Unit system. Defaults to the global units setting", values: "metric, imperial" },
-      { name: "days", description: "Calendar days to display when endDate is omitted", values: "**2**, 1, 7, 14" },
-      { name: "startDate", description: "First day to fetch. Defaults to today", values: "**today**, 2024-01-01" },
-      { name: "endDate", description: "Last day to fetch, inclusive", values: "**+1**, +1d, 2024-01-02" },
-      { name: "tables", description: "Tables to populate", values: "**stations, predictions, daily**" },
+      { name: "id", description: "Required identifier for the materialized definition", values: { examples: ["atlantic-city"] } },
+      { name: "name", values: { examples: ["Atlantic City"] } },
+      { name: "location", description: "Coordinates for nearest station; supports up to 10 total tide sources separated by ;", values: { examples: ["39.355,-74.418"] } },
+      { name: "station", description: "Station name to search; supports multiple separated by ;", values: { examples: ["\"Atlantic City\""] } },
+      { name: "stationId", description: "NOAA station ID; supports multiple separated by ;", values: { examples: ["8534720"] } },
+      { name: "maxStations", description: "Nearby stations to pull per location (total capped at 10)", values: { choices: ["1", "3", "5", "10"], default: "1" } },
+      { name: "datum", description: "Reference level heights are measured from", values: { choices: ["MLLW", "NAVD88", "STND"], default: "MLLW" } },
+      { name: "units", description: "Unit system. Defaults to the global units setting", values: { choices: ["metric", "imperial"] } },
+      { name: "days", description: "Calendar days to display when endDate is omitted", values: { examples: ["2", "1", "7", "14"], default: "2" } },
+      { name: "startDate", description: "First day to fetch. Defaults to today", values: { examples: ["today", "2024-01-01"], default: "today" } },
+      { name: "endDate", description: "Last day to fetch, inclusive", values: { examples: ["+1", "+1d", "2024-01-02"], default: "+1" } },
+      { name: "tables", values: { choices: ["stations", "predictions", "daily"], default: ["stations", "predictions", "daily"] } },
       COMMON_CACHE_PARAM
     ]
   },
@@ -297,15 +310,15 @@ const TIDES_CODE_BLOCK_DEFINITIONS: CodeBlockDefinition[] = [
     description: "Solar event tables",
     parameters: [
       ...COMMON_SIZE_PARAMS,
-      { name: "location", description: "Coordinates", values: "41.408,-75.662 or note's Location" },
+      { name: "location", values: "41.408,-75.662 or note's Location" },
       { name: "timezone", description: "IANA timezone for solar event times", values: "America/New_York, UTC" },
-      { name: "startDate", description: "First day to fetch. Defaults to today", values: "**today**, 2024-01-01" },
-      { name: "endDate", description: "Last day to fetch, inclusive", values: "**today+7**, 2024-01-07" },
-      { name: "showTwilight", description: "Adds the civil, nautical, and astronomical twilight rows", values: "**false**, true" },
-      { name: "showDayLength", description: "Adds the daylight duration row", values: "**false**, true" },
-      { name: "showSolarNoon", description: "Adds the solar noon row", values: "**false**, true" },
-      { name: "showAzimuth", description: "Show where on the horizon the sun rises and sets, as a bearing clockwise from north with its compass point (62° ENE)", values: "**false**, true" },
-      { name: "showAltitude", description: "Show the sun's peak altitude above the horizon at solar noon", values: "**false**, true" },
+      { name: "startDate", description: "First day to fetch. Defaults to today", values: { examples: ["today", "2024-01-01"], default: "today" } },
+      { name: "endDate", description: "Last day to fetch, inclusive", values: { examples: ["today+7", "2024-01-07"], default: "today+7" } },
+      { name: "showTwilight", description: "Adds the civil, nautical, and astronomical twilight rows", values: { choices: ["false", "true"], default: "false" } },
+      { name: "showDayLength", description: "Adds the daylight duration row", values: { choices: ["false", "true"], default: "false" } },
+      { name: "showSolarNoon", description: "Adds the solar noon row", values: { choices: ["false", "true"], default: "false" } },
+      { name: "showAzimuth", description: "Show where on the horizon the sun rises and sets, as a bearing clockwise from north with its compass point (62 degrees ENE)", values: { choices: ["false", "true"], default: "false" } },
+      { name: "showAltitude", description: "Show the sun's peak altitude above the horizon at solar noon", values: { choices: ["false", "true"], default: "false" } },
       COMMON_CACHE_PARAM
     ]
   },
@@ -314,14 +327,14 @@ const TIDES_CODE_BLOCK_DEFINITIONS: CodeBlockDefinition[] = [
     description: "Sun-altitude arc and twilight/daylight band for a single day",
     parameters: [
       ...COMMON_SIZE_PARAMS,
-      { name: "location", description: "Coordinates", values: "41.408,-75.662 or note's Location" },
+      { name: "location", values: "41.408,-75.662 or note's Location" },
       { name: "timezone", description: "IANA timezone for solar event times", values: "America/New_York, UTC" },
-      { name: "startDate", description: "Start day", values: "**today**, 2024-06-21, today+1" },
-      { name: "endDate", description: "End day - renders one section per day across the range", values: "+2d, 2024-06-23" },
-      { name: "layout", description: "Multi-day layout: stacked rows or one continuous chart", values: "**rows**, continuous" },
-      { name: "showHeader", description: "Show the title/location header", values: "**true**, false" },
-      { name: "showSummary", description: "Show the sunrise/noon/sunset summary row", values: "**true**, false" },
-      { name: "showLegend", description: "Show the twilight shading legend", values: "**true**, false" },
+      { name: "startDate", description: "Start day", values: { examples: ["today", "2024-06-21", "today+1"], default: "today" } },
+      { name: "endDate", description: "End day - renders one section per day across the range", values: { examples: ["+2d", "2024-06-23"] } },
+      { name: "layout", description: "Multi-day layout: stacked rows or one continuous chart", values: { choices: ["rows", "continuous"], default: "rows" } },
+      { name: "showHeader", description: "Show the title/location header", values: { choices: ["true", "false"], default: "true" } },
+      { name: "showSummary", description: "Show the sunrise/noon/sunset summary row", values: { choices: ["true", "false"], default: "true" } },
+      { name: "showLegend", description: "Show the twilight shading legend", values: { choices: ["true", "false"], default: "true" } },
       COMMON_CACHE_PARAM
     ]
   },
@@ -329,13 +342,13 @@ const TIDES_CODE_BLOCK_DEFINITIONS: CodeBlockDefinition[] = [
     type: "places-solar-vaultquery",
     description: "Solar materialized table definition for VaultQuery",
     parameters: [
-      { name: "id", description: "Stable query identifier", values: "scranton-pa" },
-      { name: "name", description: "Display name", values: "Scranton, PA" },
-      { name: "coordinates", description: "Coordinates", values: "41.408,-75.662" },
+      { name: "id", description: "Required identifier for the materialized definition", values: { examples: ["scranton-pa"] } },
+      { name: "name", values: { examples: ["Scranton, PA"] } },
+      { name: "coordinates", values: "41.408,-75.662" },
       { name: "location", description: "Alternative coordinates key", values: "41.408,-75.662" },
-      { name: "startDate", description: "First day to fetch. Defaults to today", values: "**today**, 2024-01-01" },
-      { name: "endDate", description: "Last day to fetch, inclusive", values: "**+1w**, +7d, 2024-01-07" },
-      { name: "tables", description: "Tables to populate", values: "**events, positions**" },
+      { name: "startDate", description: "First day to fetch. Defaults to today", values: { examples: ["today", "2024-01-01"], default: "today" } },
+      { name: "endDate", description: "Last day to fetch, inclusive", values: { examples: ["+1w", "+7d", "2024-01-07"], default: "+1w" } },
+      { name: "tables", values: { choices: ["events", "positions"], default: ["events", "positions"] } },
       { name: "timezone", description: "IANA timezone overriding the coordinate lookup", values: "America/New_York" },
       COMMON_CACHE_PARAM
     ]
@@ -349,8 +362,8 @@ const WEATHER_CODE_BLOCK_DEFINITIONS: CodeBlockDefinition[] = [
     parameters: [
       ...COMMON_WEATHER_PARAMS,
       DEBUG_PARAM,
-      { name: "mode", values: "**current**, minutely15, hourly, daily" },
-      { name: "showSunriseSunset", description: "Show sunrise and sunset times in daily mode", values: "**false**, true" },
+      { name: "mode", values: { examples: ["current", "minutely15", "hourly", "daily"], default: "current" } },
+      { name: "showSunriseSunset", description: "Show sunrise and sunset times in minutely15, hourly, and daily modes", values: { choices: ["false", "true"], default: "false" } },
       ...WEATHER_VARIABLE_PARAMS,
     ]
   },
@@ -361,9 +374,9 @@ const WEATHER_CODE_BLOCK_DEFINITIONS: CodeBlockDefinition[] = [
       ...COMMON_SIZE_PARAMS,
       ...COMMON_WEATHER_PARAMS,
       DEBUG_PARAM,
-      { name: "hourly", description: "Hourly variables to chart", values: "temperature_2m, precipitation" },
-      { name: "minutely15", description: "15-minute weather variables to chart", values: "temperature_2m, precipitation" },
-      { name: "daily", description: "Daily weather variables to chart", values: "temperature_2m_max, precipitation_sum" },
+      { name: "hourly", description: "Hourly variables to chart", values: { examples: ["temperature_2m", "precipitation"] } },
+      { name: "minutely15", description: "15-minute weather variables to chart", values: { examples: ["temperature_2m", "precipitation"] } },
+      { name: "daily", description: "Daily weather variables to chart", values: { examples: ["temperature_2m_max", "precipitation_sum"] } },
     ]
   },
   {
@@ -372,30 +385,32 @@ const WEATHER_CODE_BLOCK_DEFINITIONS: CodeBlockDefinition[] = [
     parameters: [
       ...COMMON_WEATHER_PARAMS,
       DEBUG_PARAM,
-      { name: "mode", values: "**hourly**, daily" },
-      { name: "columns", description: "Which columns appear, in the order written", values: "time, weather, temp, precip_prob, wind" },
+      { name: "mode", values: { examples: ["hourly", "daily"], default: "hourly" } },
+      { name: "columns", description: "Which columns appear, in the order written", values: { examples: ["time", "weather", "temp", "precip_prob", "wind"] } },
     ]
   },
   {
     type: "places-weather-template",
-    description: "Custom weather template with JavaScript",
+    description: "Custom weather display with Knap or JavaScript",
     parameters: [
       ...COMMON_WEATHER_PARAMS,
       DEBUG_PARAM,
       ...WEATHER_VARIABLE_PARAMS,
+      { name: "templateFile", description: "Vault Knap template file", values: { examples: ["Places Templates/Weather.knap.md"] } },
+      { name: "templateEngine", description: "Knap Markdown or JavaScript HTML (default)", values: { choices: ["knap", "javascript"], default: "javascript" } },
     ]
   },
   {
     type: "places-weather-vaultquery",
     description: "Weather materialized table definition for VaultQuery",
     parameters: [
-      { name: "id", description: "Stable query identifier", values: "scranton-pa" },
-      { name: "name", description: "Display name", values: "Scranton, PA" },
+      { name: "id", description: "Required identifier for the materialized definition", values: { examples: ["scranton-pa"] } },
+      { name: "name", values: { examples: ["Scranton, PA"] } },
       ...COMMON_WEATHER_PARAMS,
       DEBUG_PARAM,
-      { name: "daily", description: "Daily weather variables", values: "weather_code, temperature_2m_max, temperature_2m_min" },
-      { name: "hourly", description: "Hourly weather variables", values: "temperature_2m, apparent_temperature, precipitation_probability" },
-      { name: "tables", description: "Tables to populate", values: "**daily**, hourly" },
+      { name: "daily", description: "Daily weather variables", values: { examples: ["weather_code", "temperature_2m_max", "temperature_2m_min"] } },
+      { name: "hourly", values: { examples: ["temperature_2m", "apparent_temperature", "precipitation_probability"] } },
+      { name: "tables", values: { choices: ["daily", "hourly"], default: "daily" } },
     ]
   }
 ];
@@ -403,76 +418,37 @@ const WEATHER_CODE_BLOCK_DEFINITIONS: CodeBlockDefinition[] = [
 const TIDES_HIGHLIGHT_CONFIGS: CodeBlockHighlightConfig[] = [
   {
     blockType: 'places-tide-table',
+    valueDetails: { units: TIDE_UNIT_DETAILS },
     validKeys: [...COMMON_SIZE_KEYS, 'location', 'station', 'stationId', 'datum', 'units', 'days', 'startDate', 'endDate', 'showStation', 'showSolar', 'showMoonPhases', 'exportHourlyEstimates', 'cache', 'debug'],
-    knownValues: {
-      datum: ['mllw', 'navd88', 'stnd'],
-      units: UNIT_VALUES,
-      showStation: BOOLEAN_VALUES,
-      showSolar: BOOLEAN_VALUES,
-      showMoonPhases: BOOLEAN_VALUES,
-      exportHourlyEstimates: BOOLEAN_VALUES,
-    }
   },
   {
     blockType: 'places-tide-cards',
+    valueDetails: { units: TIDE_UNIT_DETAILS },
     validKeys: [...COMMON_SIZE_KEYS, 'location', 'station', 'stationId', 'datum', 'units', 'days', 'startDate', 'endDate', 'showStation', 'showSolar', 'showMoonPhases', 'exportHourlyEstimates', 'cache', 'debug'],
-    knownValues: {
-      datum: ['mllw', 'navd88', 'stnd'],
-      units: UNIT_VALUES,
-      showStation: BOOLEAN_VALUES,
-      showSolar: BOOLEAN_VALUES,
-      showMoonPhases: BOOLEAN_VALUES,
-      exportHourlyEstimates: BOOLEAN_VALUES,
-    }
   },
   {
     blockType: 'places-tide-chart',
+    valueDetails: { units: TIDE_UNIT_DETAILS },
     validKeys: [...COMMON_SIZE_KEYS, 'location', 'station', 'stationId', 'datum', 'units', 'days', 'startDate', 'endDate', 'showStation', 'cache', 'debug'],
-    knownValues: {
-      datum: ['mllw', 'navd88', 'stnd'],
-      units: UNIT_VALUES,
-      showStation: BOOLEAN_VALUES,
-    }
   },
   {
     blockType: 'places-tides-vaultquery',
+    valueDetails: { units: TIDE_UNIT_DETAILS },
     validKeys: ['id', 'name', 'location', 'station', 'stationId', 'maxStations', 'datum', 'units', 'days', 'startDate', 'endDate', 'tables', 'cache', 'debug'],
     multiValueKeys: ['tables'],
-    knownValues: {
-      maxStations: ['1', '3', '5', '10'],
-      datum: ['mllw', 'navd88', 'stnd'],
-      units: UNIT_VALUES,
-      tables: ['stations', 'predictions', 'daily'],
-    }
   },
   {
     blockType: 'places-solar-table',
     validKeys: [...COMMON_SIZE_KEYS, 'location', 'timezone', 'startDate', 'endDate', 'showTwilight', 'showDayLength', 'showSolarNoon', 'showAzimuth', 'showAltitude', 'cache', 'debug'],
-    knownValues: {
-      showTwilight: BOOLEAN_VALUES,
-      showDayLength: BOOLEAN_VALUES,
-      showSolarNoon: BOOLEAN_VALUES,
-      showAzimuth: BOOLEAN_VALUES,
-      showAltitude: BOOLEAN_VALUES,
-    }
   },
   {
     blockType: 'places-solar-chart',
     validKeys: [...COMMON_SIZE_KEYS, 'location', 'timezone', 'startDate', 'endDate', 'layout', 'showHeader', 'showSummary', 'showLegend', 'cache', 'debug'],
-    knownValues: {
-      layout: ['rows', 'continuous'],
-      showHeader: BOOLEAN_VALUES,
-      showSummary: BOOLEAN_VALUES,
-      showLegend: BOOLEAN_VALUES,
-    }
   },
   {
     blockType: 'places-solar-vaultquery',
     validKeys: ['id', 'name', 'coordinates', 'location', 'timezone', 'startDate', 'endDate', 'tables', 'cache'],
     multiValueKeys: ['tables'],
-    knownValues: {
-      tables: ['events', 'positions'],
-    }
   }
 ];
 
@@ -487,10 +463,8 @@ const WEATHER_HIGHLIGHT_CONFIGS: CodeBlockHighlightConfig[] = [
       minutely15: WEATHER_MINUTELY15_VARIABLES,
       hourly: WEATHER_HOURLY_VARIABLES,
       daily: WEATHER_DAILY_VARIABLES,
-      units: UNIT_VALUES,
-      showSunriseSunset: ['false', 'true'],
-      cellSelection: ['land', 'sea', 'nearest']
-    }
+    },
+    valueDetails: WEATHER_VARIABLE_DETAILS,
   },
   {
     blockType: 'places-weather-chart',
@@ -500,9 +474,8 @@ const WEATHER_HIGHLIGHT_CONFIGS: CodeBlockHighlightConfig[] = [
       hourly: WEATHER_HOURLY_VARIABLES,
       minutely15: WEATHER_MINUTELY15_VARIABLES,
       daily: WEATHER_DAILY_VARIABLES,
-      units: UNIT_VALUES,
-      cellSelection: ['land', 'sea', 'nearest']
-    }
+    },
+    valueDetails: WEATHER_VARIABLE_DETAILS,
   },
   {
     blockType: 'places-weather-table',
@@ -511,8 +484,6 @@ const WEATHER_HIGHLIGHT_CONFIGS: CodeBlockHighlightConfig[] = [
     knownValues: {
       mode: ['hourly', 'daily', 'h', 'd'],
       columns: WEATHER_TABLE_COLUMNS,
-      units: UNIT_VALUES,
-      cellSelection: ['land', 'sea', 'nearest']
     },
     contextualKnownValues: [
       {
@@ -529,16 +500,22 @@ const WEATHER_HIGHLIGHT_CONFIGS: CodeBlockHighlightConfig[] = [
   },
   {
     blockType: 'places-weather-template',
-    validKeys: ['coordinates', 'location', 'current', 'minutely15', 'hourly', 'daily', 'startDate', 'endDate', 'startTime', 'endTime', 'days', 'units', 'cache', 'cellSelection'],
+    validKeys: ['coordinates', 'location', 'current', 'minutely15', 'hourly', 'daily', 'startDate', 'endDate', 'startTime', 'endTime', 'days', 'units', 'cache', 'cellSelection', 'templateEngine', 'templateFile'],
     multiValueKeys: ['current', 'minutely15', 'hourly', 'daily'],
     knownValues: {
+      templateEngine: ['knap', 'javascript'],
       current: WEATHER_CURRENT_VARIABLES,
       minutely15: WEATHER_MINUTELY15_VARIABLES,
       hourly: WEATHER_HOURLY_VARIABLES,
       daily: WEATHER_DAILY_VARIABLES,
-      units: UNIT_VALUES,
-      cellSelection: ['land', 'sea', 'nearest']
-    }
+    },
+    valueDetails: {
+      ...WEATHER_VARIABLE_DETAILS,
+      templateEngine: {
+        knap: 'Render Markdown from an external Knap template file',
+        javascript: 'Render HTML from a JavaScript template literal in the block body',
+      },
+    },
   },
   {
     blockType: 'places-weather-vaultquery',
@@ -547,10 +524,8 @@ const WEATHER_HIGHLIGHT_CONFIGS: CodeBlockHighlightConfig[] = [
     knownValues: {
       daily: WEATHER_DAILY_VARIABLES,
       hourly: WEATHER_HOURLY_VARIABLES,
-      tables: ['daily', 'hourly'],
-      units: UNIT_VALUES,
-      cellSelection: ['land', 'sea', 'nearest']
-    }
+    },
+    valueDetails: WEATHER_VARIABLE_DETAILS,
   }
 ];
 
